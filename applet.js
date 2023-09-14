@@ -17,13 +17,11 @@ MyApplet.prototype = {
       instance_id
     );
 
-    this.set_applet_label("Start!");
     this._httpSession = new Soup.SessionAsync();
     this._updateData();
   },
 
   _updateData: function () {
-    this.set_applet_label("Start!?");
     const url = "http://localhost:5605/";
     const message = Soup.Message.new("GET", url);
     this._httpSession.queue_message(message, this._onData.bind(this));
