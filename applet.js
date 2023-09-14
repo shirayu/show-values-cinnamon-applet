@@ -20,6 +20,7 @@ MyApplet.prototype = {
     this.json = null;
     this.mode = false;
     this.threshold = 900;
+    this._applet_tooltip._tooltip.set_style("text-align:left");
     this._display();
     this._httpSession = new Soup.SessionAsync();
     this._updateData();
@@ -45,6 +46,15 @@ MyApplet.prototype = {
         }
         this.mode = !this.mode;
       }
+      const lastd = new Date(this.json.time * 1000);
+      const tf =
+        "Last modified: " +
+        lastd.toLocaleDateString() +
+        " " +
+        lastd.toLocaleTimeString();
+      this.set_applet_tooltip(
+        tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t")
+      );
     }
 
     const updateInterval = 500; // 0.5 sec
