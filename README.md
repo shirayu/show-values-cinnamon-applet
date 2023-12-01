@@ -1,5 +1,5 @@
 
-# ShowVaues on Cinamone applet
+# ShowValues on Cinamone applet
 
 ## Reload the applet
 
