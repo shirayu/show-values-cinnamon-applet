@@ -20,6 +20,9 @@ MyApplet.prototype = {
     this.json = null;
     this.mode = false;
     this.threshold = 900;
+    this.updateInterval_display = 500; // 0.5 sec
+    this.updateInterval_data = 10000; // 10 sec
+
     this._applet_tooltip._tooltip.set_style("text-align:left");
     this._display();
     this._httpSession = new Soup.SessionAsync();
@@ -33,43 +36,43 @@ MyApplet.prototype = {
   },
 
   _display: function () {
-    if (this.json !== null) {
-      const ppm = this.json.stat.co2ppm;
-      const label = `${ppm} ppm`;
-      if (ppm < this.threshold) {
-        this.set_applet_label(label);
-      } else {
-        if (this.mode) {
-          this.set_applet_label(`⚠${label}`);
+    try {
+      if (this.json !== null) {
+        const ppm = this.json.stat.co2ppm;
+        const label = `${ppm} ppm`;
+        if (ppm < this.threshold) {
+          this.set_applet_label(label);
         } else {
-          this.set_applet_label(`${label}`);
+          if (this.mode) {
+            this.set_applet_label(`⚠${label}`);
+          } else {
+            this.set_applet_label(`${label}`);
+          }
+          this.mode = !this.mode;
         }
-        this.mode = !this.mode;
+        const lastd = new Date(this.json.time * 1000);
+        const tf =
+          "Last modified: " +
+          lastd.toLocaleDateString() +
+          " " +
+          lastd.toLocaleTimeString();
+        this.set_applet_tooltip(
+          tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t")
+        );
       }
-      const lastd = new Date(this.json.time * 1000);
-      const tf =
-        "Last modified: " +
-        lastd.toLocaleDateString() +
-        " " +
-        lastd.toLocaleTimeString();
-      this.set_applet_tooltip(
-        tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t")
-      );
-    }
+    } catch (e) {}
 
-    const updateInterval = 500; // 0.5 sec
-    Mainloop.timeout_add(updateInterval, this._display.bind(this));
+    Mainloop.timeout_add(this.updateInterval_display, this._display.bind(this));
   },
 
   _onData: function (session, message) {
-    if (message.status_code !== Soup.Status.OK) {
-      return;
-    }
+    try {
+      if (message.status_code == Soup.Status.OK) {
+        this.json = JSON.parse(message.response_body.data);
+      }
+    } catch (e) {}
 
-    this.json = JSON.parse(message.response_body.data);
-
-    const updateInterval = 10000; // 10 sec
-    Mainloop.timeout_add(updateInterval, this._updateData.bind(this));
+    Mainloop.timeout_add(this.updateInterval_data, this._updateData.bind(this));
   },
 };
 
