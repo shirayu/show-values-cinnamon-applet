@@ -44,7 +44,7 @@ MyApplet.prototype = {
           this.set_applet_label(label);
         } else {
           if (this.mode) {
-            this.set_applet_label(`⚠${label}`);
+            this.set_applet_label(`⚠️${label}`);
           } else {
             this.set_applet_label(`${label}`);
           }
