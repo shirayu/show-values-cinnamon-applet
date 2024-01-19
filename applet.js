@@ -19,8 +19,9 @@ MyApplet.prototype = {
 
     this.json = null;
     this.mode = false;
-    this.threshold = 900;
-    this.updateInterval_display = 500; // 0.5 sec
+    this.threshold1 = 800;
+    this.threshold2 = 900;
+    this.updateInterval_display = 300; // 0.3 sec
     this.updateInterval_data = 10000; // 10 sec
 
     this._applet_tooltip._tooltip.set_style("text-align:left");
@@ -40,11 +41,15 @@ MyApplet.prototype = {
       if (this.json !== null) {
         const ppm = this.json.stat.co2ppm;
         const label = `${ppm} ppm`;
-        if (ppm < this.threshold) {
+        if (ppm < this.threshold1) {
           this.set_applet_label(label);
         } else {
           if (this.mode) {
-            this.set_applet_label(`⚠️${label}`);
+            let icon = "⚠️";
+            if (ppm > this.threshold2) {
+              icon = "❌";
+            }
+            this.set_applet_label(`${icon}${label}`);
           } else {
             this.set_applet_label(`${label}`);
           }
