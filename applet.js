@@ -1,6 +1,9 @@
 const Applet = imports.ui.applet;
 const Mainloop = imports.mainloop;
 const Soup = imports.gi.Soup;
+global.log(
+  `Soup: ${Soup.MAJOR_VERSION}.${Soup.MINOR_VERSION}.${Soup.MICRO_VERSION}`,
+);
 
 function MyApplet(orientation, panel_height, instance_id) {
   this._init(orientation, panel_height, instance_id);
@@ -26,14 +29,19 @@ MyApplet.prototype = {
 
     this._applet_tooltip._tooltip.set_style("text-align:left");
     this._display();
-    this._httpSession = new Soup.SessionAsync();
+    this._httpSession = new Soup.Session();
     this._updateData();
   },
 
   _updateData: function () {
-    const url = "http://localhost:5605/";
+    const url = "http://localhost:5605";
+    global.log(imports.gi.GLib.Uri.parse(url));
     const message = Soup.Message.new("GET", url);
-    this._httpSession.queue_message(message, this._onData.bind(this));
+    global.log(message.get_method(), message.get_uri());
+    const result = this._httpSession.send_and_read(message, null);
+
+    global.log(result); // FIXME
+    global.log(JSON.stringify(result)); // FIXME
   },
 
   _display: function () {
