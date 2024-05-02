@@ -14,7 +14,7 @@ MyApplet.prototype = {
       this,
       orientation,
       panel_height,
-      instance_id
+      instance_id,
     );
 
     this.json = null;
@@ -62,7 +62,7 @@ MyApplet.prototype = {
           " " +
           lastd.toLocaleTimeString();
         this.set_applet_tooltip(
-          tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t")
+          tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t"),
         );
       }
     } catch (e) {}
