@@ -1,6 +1,9 @@
 const Applet = imports.ui.applet;
 const Mainloop = imports.mainloop;
 const Soup = imports.gi.Soup;
+global.log(
+  `Soup: ${Soup.MAJOR_VERSION}.${Soup.MINOR_VERSION}.${Soup.MICRO_VERSION}`,
+);
 
 function MyApplet(orientation, panel_height, instance_id) {
   this._init(orientation, panel_height, instance_id);
@@ -26,19 +29,29 @@ MyApplet.prototype = {
 
     this._applet_tooltip._tooltip.set_style("text-align:left");
     this._display();
-    this._httpSession = new Soup.SessionAsync();
+    this._httpSession = new Soup.Session();
     this._updateData();
   },
 
   _updateData: function () {
-    const url = "http://localhost:5605/";
+    const url = "http://localhost:5605";
     const message = Soup.Message.new("GET", url);
-    this._httpSession.queue_message(message, this._onData.bind(this));
+    const bytes = this._httpSession.send_and_read(message, null);
+    if (bytes === null) {
+      this.set_applet_tooltip(`Failed to load data: ${url}`);
+    } else {
+      const decoder = new TextDecoder("utf-8");
+      const result = decoder.decode(bytes.get_data());
+      this.json = JSON.parse(result);
+    }
+    Mainloop.timeout_add(this.updateInterval_data, this._updateData.bind(this));
   },
 
   _display: function () {
     try {
-      if (this.json !== null) {
+      if (this.json === null) {
+        this.set_applet_label("No data");
+      } else {
         const ppm = this.json.stat.co2ppm;
         const label = `${ppm} ppm`;
         if (ppm < this.threshold1) {
@@ -68,16 +81,6 @@ MyApplet.prototype = {
     } catch (e) {}
 
     Mainloop.timeout_add(this.updateInterval_display, this._display.bind(this));
-  },
-
-  _onData: function (session, message) {
-    try {
-      if (message.status_code == Soup.Status.OK) {
-        this.json = JSON.parse(message.response_body.data);
-      }
-    } catch (e) {}
-
-    Mainloop.timeout_add(this.updateInterval_data, this._updateData.bind(this));
   },
 };
 
