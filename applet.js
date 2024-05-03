@@ -35,18 +35,23 @@ MyApplet.prototype = {
 
   _updateData: function () {
     const url = "http://localhost:5605";
-    global.log(imports.gi.GLib.Uri.parse(url));
     const message = Soup.Message.new("GET", url);
-    global.log(message.get_method(), message.get_uri());
-    const result = this._httpSession.send_and_read(message, null);
-
-    global.log(result); // FIXME
-    global.log(JSON.stringify(result)); // FIXME
+    const bytes = this._httpSession.send_and_read(message, null);
+    if (bytes === null) {
+      this.set_applet_tooltip(`Failed to load data: ${url}`);
+    } else {
+      const decoder = new TextDecoder("utf-8");
+      const result = decoder.decode(bytes.get_data());
+      this.json = JSON.parse(result);
+    }
+    Mainloop.timeout_add(this.updateInterval_data, this._updateData.bind(this));
   },
 
   _display: function () {
     try {
-      if (this.json !== null) {
+      if (this.json === null) {
+        this.set_applet_label("No data");
+      } else {
         const ppm = this.json.stat.co2ppm;
         const label = `${ppm} ppm`;
         if (ppm < this.threshold1) {
@@ -76,16 +81,6 @@ MyApplet.prototype = {
     } catch (e) {}
 
     Mainloop.timeout_add(this.updateInterval_display, this._display.bind(this));
-  },
-
-  _onData: function (session, message) {
-    try {
-      if (message.status_code == Soup.Status.OK) {
-        this.json = JSON.parse(message.response_body.data);
-      }
-    } catch (e) {}
-
-    Mainloop.timeout_add(this.updateInterval_data, this._updateData.bind(this));
   },
 };
 
