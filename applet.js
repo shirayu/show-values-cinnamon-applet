@@ -1,9 +1,7 @@
 const Applet = imports.ui.applet;
 const Mainloop = imports.mainloop;
 const Soup = imports.gi.Soup;
-global.log(
-  `Soup: ${Soup.MAJOR_VERSION}.${Soup.MINOR_VERSION}.${Soup.MICRO_VERSION}`,
-);
+global.log(`Soup: ${Soup.MAJOR_VERSION}.${Soup.MINOR_VERSION}.${Soup.MICRO_VERSION}`);
 
 function MyApplet(orientation, panel_height, instance_id) {
   this._init(orientation, panel_height, instance_id);
@@ -13,12 +11,7 @@ MyApplet.prototype = {
   __proto__: Applet.TextApplet.prototype,
 
   _init: function (orientation, panel_height, instance_id) {
-    Applet.TextApplet.prototype._init.call(
-      this,
-      orientation,
-      panel_height,
-      instance_id,
-    );
+    Applet.TextApplet.prototype._init.call(this, orientation, panel_height, instance_id);
 
     this.json = null;
     this.mode = false;
@@ -58,7 +51,7 @@ MyApplet.prototype = {
           this.set_applet_label(label);
         } else {
           if (this.mode) {
-            let icon = "⚠️";
+            let icon = "!";
             if (ppm > this.threshold2) {
               icon = "❌";
             }
@@ -69,14 +62,8 @@ MyApplet.prototype = {
           this.mode = !this.mode;
         }
         const lastd = new Date(this.json.time * 1000);
-        const tf =
-          "Last modified: " +
-          lastd.toLocaleDateString() +
-          " " +
-          lastd.toLocaleTimeString();
-        this.set_applet_tooltip(
-          tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t"),
-        );
+        const tf = "Last modified: " + lastd.toLocaleDateString() + " " + lastd.toLocaleTimeString();
+        this.set_applet_tooltip(tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t"));
       }
     } catch (e) {}
 

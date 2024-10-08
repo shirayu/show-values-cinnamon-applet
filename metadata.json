@@ -1,7 +1,7 @@
 {
-    "uuid": "ShowValues@shirayu",
-    "name": "Show Values",
-    "description": "Show Values",
-    "enabled": true,
-    "last-edited":1694607518
+  "uuid": "ShowValues@shirayu",
+  "name": "Show Values",
+  "description": "Show Values",
+  "enabled": true,
+  "last-edited": 1694607518
 }
