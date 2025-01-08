@@ -76,12 +76,14 @@ MyApplet.prototype = {
         const tf = "Last modified: " + lastd.toLocaleDateString() + " " + lastd.toLocaleTimeString();
         this.set_applet_tooltip(tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t"));
       }
-    } catch (e) {}
+    } catch (e) {
+      global.logError(`Error in _display: ${e.message}`);
+    }
 
     if (this._displayTimeout) {
       Mainloop.source_remove(this._displayTimeout);
     }
-    Mainloop.timeout_add(this.updateInterval_display, this._display.bind(this));
+    this._displayTimeout = Mainloop.timeout_add(this.updateInterval_display, this._display.bind(this));
   },
 };
 
