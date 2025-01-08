@@ -38,7 +38,12 @@ MyApplet.prototype = {
     } else {
       const decoder = new TextDecoder("utf-8");
       const result = decoder.decode(bytes.get_data());
-      this.json = JSON.parse(result);
+      try {
+        this.json = JSON.parse(result);
+      } catch (e) {
+        this.set_applet_tooltip(`Error parsing JSON: ${e.message}`);
+        this.json = null;
+      }
     }
     if (this._updateDataTimeout) {
       Mainloop.source_remove(this._updateDataTimeout);
