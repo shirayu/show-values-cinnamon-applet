@@ -13,6 +13,9 @@ MyApplet.prototype = {
   _init: function (orientation, panel_height, instance_id) {
     Applet.TextApplet.prototype._init.call(this, orientation, panel_height, instance_id);
 
+    this._updateDataTimeout = null;
+    this._displayTimeout = null;
+
     this.json = null;
     this.mode = false;
     this.threshold1 = 800;
@@ -37,7 +40,10 @@ MyApplet.prototype = {
       const result = decoder.decode(bytes.get_data());
       this.json = JSON.parse(result);
     }
-    Mainloop.timeout_add(this.updateInterval_data, this._updateData.bind(this));
+    if (this._updateDataTimeout) {
+      Mainloop.source_remove(this._updateDataTimeout);
+    }
+    this._updateDataTimeout = Mainloop.timeout_add(this.updateInterval_data, this._updateData.bind(this));
   },
 
   _display: function () {
@@ -67,6 +73,9 @@ MyApplet.prototype = {
       }
     } catch (e) {}
 
+    if (this._displayTimeout) {
+      Mainloop.source_remove(this._displayTimeout);
+    }
     Mainloop.timeout_add(this.updateInterval_display, this._display.bind(this));
   },
 };
