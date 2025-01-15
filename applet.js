@@ -20,7 +20,7 @@ MyApplet.prototype = {
     this.mode = false;
     this.threshold1 = 800;
     this.threshold2 = 900;
-    this.updateInterval_display = 300; // 0.3 sec
+    this.updateInterval_display = 1000; // 1.0 sec
     this.updateInterval_data = 10000; // 10 sec
 
     this._applet_tooltip._tooltip.set_style("text-align:left");
@@ -58,20 +58,33 @@ MyApplet.prototype = {
       } else {
         const ppm = this.json.stat.co2ppm;
         const label = `${ppm} ppm`;
-        if (ppm < this.threshold1) {
-          this.set_applet_label(label);
-        } else {
-          if (this.mode) {
-            let icon = "!";
-            if (ppm > this.threshold2) {
+        let icon = "";
+        if (ppm >= this.threshold1) {
+          this.updateInterval_display = 300; // 0.3 sec
+          if (ppm > this.threshold2) {
+            if (this.mode) {
               icon = "❌";
+            } else {
+              icon = "🟥";
             }
-            this.set_applet_label(`${icon}${label}`);
           } else {
-            this.set_applet_label(`${label}`);
+            if (this.mode) {
+              icon = "🟧";
+            } else {
+              icon = "🟨";
+            }
+          }
+          this.mode = !this.mode;
+        } else {
+          this.updateInterval_display = 1000; // 1.0 sec
+          if (this.mode) {
+            icon = ".";
+          } else {
+            icon = " ";
           }
           this.mode = !this.mode;
         }
+        this.set_applet_label(`${icon}${label}`);
         const lastd = new Date(this.json.time * 1000);
         const tf = "Last modified: " + lastd.toLocaleDateString() + " " + lastd.toLocaleTimeString();
         this.set_applet_tooltip(tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t"));
