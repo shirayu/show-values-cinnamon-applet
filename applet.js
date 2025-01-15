@@ -57,7 +57,9 @@ MyApplet.prototype = {
         this.set_applet_label("No data");
       } else {
         const ppm = this.json.stat.co2ppm;
-        const label = `${ppm} ppm`;
+        const humidity = Math.trunc(this.json.stat.humidity);
+        const temperature = this.json.stat.temperature;
+        const label = `${ppm} ppm, ${humidity}%, ${temperature}℃`;
         let icon = "";
         if (ppm >= this.threshold1) {
           this.updateInterval_display = 300; // 0.3 sec
