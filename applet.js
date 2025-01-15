@@ -67,13 +67,13 @@ MyApplet.prototype = {
             if (this.mode) {
               icon = "❌";
             } else {
-              icon = "🟥";
+              icon = "";
             }
           } else {
             if (this.mode) {
               icon = "🟧";
             } else {
-              icon = "🟨";
+              icon = "";
             }
           }
           this.mode = !this.mode;
