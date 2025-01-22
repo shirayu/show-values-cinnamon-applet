@@ -30,24 +30,25 @@ MyApplet.prototype = {
   },
 
   _updateData: function () {
-    const url = "http://localhost:5605";
-    const message = Soup.Message.new("GET", url);
-    const bytes = this._httpSession.send_and_read(message, null);
-    if (bytes === null) {
-      this.set_applet_tooltip(`Failed to load data: ${url}`);
-    } else {
-      const decoder = new TextDecoder("utf-8");
-      const result = decoder.decode(bytes.get_data());
-      try {
+    try {
+      const url = "http://localhost:5605";
+      const message = Soup.Message.new("GET", url);
+      const bytes = this._httpSession.send_and_read(message, null);
+      if (bytes === null) {
+        this.set_applet_tooltip(`Failed to load data: ${url}`);
+      } else {
+        const decoder = new TextDecoder("utf-8");
+        const result = decoder.decode(bytes.get_data());
         this.json = JSON.parse(result);
-      } catch (e) {
-        this.set_applet_tooltip(`Error parsing JSON: ${e.message}`);
-        this.json = null;
       }
+      if (this._updateDataTimeout) {
+        Mainloop.source_remove(this._updateDataTimeout);
+      }
+    } catch (e) {
+      this.set_applet_tooltip(`Error: ${e.message}`);
+      this.json = null;
     }
-    if (this._updateDataTimeout) {
-      Mainloop.source_remove(this._updateDataTimeout);
-    }
+
     this._updateDataTimeout = Mainloop.timeout_add(this.updateInterval_data, this._updateData.bind(this));
   },
 
