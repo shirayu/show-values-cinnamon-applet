@@ -15,8 +15,11 @@ MyApplet.prototype = {
 
     this._updateDataTimeout = null;
     this._displayTimeout = null;
+    this._onUpdateData = this._updateData.bind(this);
+    this._onDisplay = this._display.bind(this);
 
     this.json = null;
+    this._tooltipText = "";
     this.mode = false;
     this.threshold1 = 800;
     this.threshold2 = 900;
@@ -40,6 +43,9 @@ MyApplet.prototype = {
         const decoder = new TextDecoder("utf-8");
         const result = decoder.decode(bytes.get_data());
         this.json = JSON.parse(result);
+        const lastd = new Date(this.json.time * 1000);
+        const tf = "Last modified: " + lastd.toLocaleDateString() + " " + lastd.toLocaleTimeString();
+        this._tooltipText = tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t");
       }
       if (this._updateDataTimeout) {
         Mainloop.source_remove(this._updateDataTimeout);
@@ -47,9 +53,10 @@ MyApplet.prototype = {
     } catch (e) {
       this.set_applet_tooltip(`Error: ${e.message}`);
       this.json = null;
+      this._tooltipText = `Error: ${e.message}`;
     }
 
-    this._updateDataTimeout = Mainloop.timeout_add(this.updateInterval_data, this._updateData.bind(this));
+    this._updateDataTimeout = Mainloop.timeout_add(this.updateInterval_data, this._onUpdateData);
   },
 
   _display: function () {
@@ -88,9 +95,7 @@ MyApplet.prototype = {
           this.mode = !this.mode;
         }
         this.set_applet_label(`${icon}${label}`);
-        const lastd = new Date(this.json.time * 1000);
-        const tf = "Last modified: " + lastd.toLocaleDateString() + " " + lastd.toLocaleTimeString();
-        this.set_applet_tooltip(tf + "\n\n" + JSON.stringify(this.json.stat, null, "\t"));
+        this.set_applet_tooltip(this._tooltipText);
       }
     } catch (e) {
       global.logError(`Error in _display: ${e.message}`);
@@ -99,7 +104,19 @@ MyApplet.prototype = {
     if (this._displayTimeout) {
       Mainloop.source_remove(this._displayTimeout);
     }
-    this._displayTimeout = Mainloop.timeout_add(this.updateInterval_display, this._display.bind(this));
+    this._displayTimeout = Mainloop.timeout_add(this.updateInterval_display, this._onDisplay);
+  },
+
+  on_applet_removed_from_panel: function () {
+    if (this._updateDataTimeout) {
+      Mainloop.source_remove(this._updateDataTimeout);
+      this._updateDataTimeout = null;
+    }
+    if (this._displayTimeout) {
+      Mainloop.source_remove(this._displayTimeout);
+      this._displayTimeout = null;
+    }
+    this._httpSession = null;
   },
 };
 
